@@ -1116,9 +1116,8 @@
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
     <li><a href="#how">How It Works</a></li>
-    
     <li><a href="#pricing">Pricing</a></li>
-    <li><a href="#blog">Blog</a></li>
+    <li><a href="blogs.html">Blog </a>></li> 
     <li><a href="#faq">FAQ</a></li>
     <li><a href="#contact" class="nav-cta">Work With Us</a></li>
   </ul>
@@ -1435,38 +1434,11 @@
   </div>
 </section>
 
-<!-- BLOG -->
 <section class="blog" id="blog">
   <div class="section-label">From The Lab</div>
   <h2 class="section-title">Distribution intelligence,<br><em>published weekly.</em></h2>
-  <div class="blog-grid">
-    <a href="#" class="blog-card">
-      <div class="blog-card-img" style="background: var(--green);">
-        <span class="blog-category">Deep Dive</span>
-      </div>
-      <div class="blog-card-body">
-        <div class="blog-card-title">How Notion got its first 10,000 users without spending a rupee on ads. And what every SaaS founder can steal from it.</div>
-        <div class="blog-card-meta">Vanshika · 8 min read · Distribution Breakdown</div>
-      </div>
-    </a>
-    <a href="#" class="blog-card small">
-      <div class="blog-card-img" style="background: #0D3D25;">
-        <span class="blog-category">Tactics</span>
-      </div>
-      <div class="blog-card-body">
-        <div class="blog-card-title">The exact Reddit post format that gets SaaS founders users without getting banned</div>
-        <div class="blog-card-meta">Vanshika · 5 min read</div>
-      </div>
-    </a>
-    <a href="#" class="blog-card small">
-      <div class="blog-card-img" style="background: #1a3a2a;">
-        <span class="blog-category">AEO</span>
-      </div>
-      <div class="blog-card-body">
-        <div class="blog-card-title">AEO is what SEO was in 2010. Here's what signals actually matter right now</div>
-        <div class="blog-card-meta">Vanshika · 6 min read</div>
-      </div>
-    </a>
+  <div class="blog-grid" id="blog-container">
+    <p style="grid-column: 1/-1; color: var(--grey); font-family: 'DM Mono', monospace;">Fetching latest insights...</p>
   </div>
 </section>
 
@@ -1575,10 +1547,22 @@
   </div>
 </footer>
 
+<section class="blog" id="blog">
+  <div class="section-label">From The Lab</div>
+  <h2 class="section-title">Distribution intelligence,<br><em>published weekly.</em></h2>
+  <div class="blog-grid" id="blog-container">
+    <p style="grid-column: 1/-1; color: var(--grey); font-family: 'DM Mono', monospace;">Fetching latest insights...</p>
+  </div>
+</section>
+
 <script>
+  // 1. SANITY INTEGRATION
   async function fetchSanityBlogs() {
-    const PROJECT_ID = uc51i7d5; // Put your ID here
+    // FIX: Project ID must be a string in quotes
+    const PROJECT_ID = "uc51i7d5"; 
     const DATASET = "production";
+    
+    // The [0...3] at the end of the query filters the result to exactly 3 posts
     const QUERY = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) [0...3] {
         title,
         author,
@@ -1608,94 +1592,42 @@
                 </a>
             `).join('');
             
-            // Re-trigger the animations for the new blogs
+            // Re-trigger animations for the newly added blog cards
             if (typeof observer !== 'undefined') {
-                document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+                document.querySelectorAll('#blog-container .blog-card').forEach(el => observer.observe(el));
             }
+        } else {
+            container.innerHTML = `<p style="grid-column: 1/-1; color: var(--grey);">No articles found.</p>`;
         }
     } catch (err) {
         console.error("Sanity connection failed:", err);
+        document.getElementById('blog-container').innerHTML = `<p style="grid-column: 1/-1; color: var(--grey);">Failed to load blogs.</p>`;
     }
 }
 
-// Call this function
+// Ensure the function is called when the page loads
 fetchSanityBlogs();
-  // FAQ toggle - click anywhere on the item
   document.querySelectorAll('.faq-item').forEach(function(item) {
     item.addEventListener('click', function() {
       var answer = item.querySelector('.faq-answer');
       var toggle = item.querySelector('.faq-toggle');
       var isOpen = item.classList.contains('open');
 
-      // Close all
       document.querySelectorAll('.faq-item').forEach(function(el) {
         el.classList.remove('open');
         el.querySelector('.faq-answer').style.maxHeight = null;
-        el.querySelector('.faq-answer').style.marginTop = null;
         el.querySelector('.faq-toggle').textContent = '+';
       });
 
-      // Open clicked if it was closed
       if (!isOpen) {
         item.classList.add('open');
         answer.style.maxHeight = answer.scrollHeight + 'px';
-        answer.style.marginTop = '1rem';
         toggle.textContent = 'x';
       }
     });
   });
 
-  // Contact form submission
-  const formSubmitBtn = document.querySelector('.form-submit');
-  if (formSubmitBtn) {
-    formSubmitBtn.addEventListener('click', () => {
-      const inputs = document.querySelectorAll('.contact-form .form-input');
-      let allFilled = true;
-      inputs.forEach(input => {
-        if (!input.value.trim()) {
-          allFilled = false;
-          input.style.borderColor = 'rgba(255, 100, 100, 0.6)';
-          input.addEventListener('input', () => {
-            input.style.borderColor = '';
-          }, { once: true });
-        }
-      });
-
-      if (!allFilled) return;
-
-      formSubmitBtn.textContent = 'Sending…';
-      formSubmitBtn.disabled = true;
-
-      // Simulate async send (replace with real endpoint)
-      setTimeout(() => {
-        inputs.forEach(input => input.value = '');
-        formSubmitBtn.textContent = '✓ Sent! We\'ll be in touch within 24 hours.';
-        formSubmitBtn.style.background = 'var(--green-light)';
-        formSubmitBtn.style.color = 'var(--green-dark)';
-        setTimeout(() => {
-          formSubmitBtn.textContent = 'Send. Let\'s Talk. →';
-          formSubmitBtn.disabled = false;
-          formSubmitBtn.style.background = '';
-          formSubmitBtn.style.color = '';
-        }, 4000);
-      }, 1200);
-    });
-  }
-
-  // Decode obfuscated email (Cloudflare strips its script when loaded locally)
-  document.querySelectorAll('.__cf_email__').forEach(el => {
-    const encoded = el.getAttribute('data-cfemail');
-    if (!encoded) return;
-    let decoded = '';
-    const key = parseInt(encoded.substring(0, 2), 16);
-    for (let i = 2; i < encoded.length; i += 2) {
-      decoded += String.fromCharCode(parseInt(encoded.substring(i, i + 2), 16) ^ key);
-    }
-    el.parentElement.textContent = decoded;
-    el.parentElement.href = 'mailto:' + decoded;
-  });
-
-  // Scroll-triggered fade-up for non-hero elements
+  // 3. SCROLL OBSERVER
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -1706,12 +1638,16 @@ fetchSanityBlogs();
     });
   }, { threshold: 0.1 });
 
-  document.querySelectorAll('.problem-card, .service-card, .how-step, .pricing-card, .blog-card').forEach(el => {
+  // Observe existing static cards
+  document.querySelectorAll('.problem-card, .service-card, .how-step, .pricing-card').forEach(el => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(20px)';
     el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
     observer.observe(el);
   });
+
+  // Initial fetch
+  fetchSanityBlogs();
 </script>
 </body>
 </html>

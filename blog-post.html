@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article | The Distribution Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { 
+    --green: #1B5E3B; 
+    --green-mid: #2E7D52;
+    --cream: #F7F4EE; 
+    --black: #0A0A0A; 
+    --grey: #6B6B6B; 
+    --white: #FFFFFF;
+    --shadow: 0 10px 30px rgba(27, 94, 59, 0.05);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body { 
+    font-family: 'DM Sans', sans-serif; 
+    background: var(--cream); 
+    color: var(--black); 
+    line-height: 1.8; 
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  /* NAV */
+  .post-nav { 
+    padding: 1.2rem 4rem; 
+    background: rgba(247, 244, 238, 0.85); 
+    backdrop-filter: blur(12px); 
+    position: fixed; 
+    width: 100%; 
+    top: 0; 
+    z-index: 100; 
+    border-bottom: 1px solid rgba(27, 94, 59, 0.08); 
+    display: flex;
+    align-items: center;
+  }
+
+  .back-btn { 
+    color: var(--green); 
+    text-decoration: none; 
+    font-weight: 600; 
+    font-size: 0.85rem; 
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.3s ease;
+  }
+
+  .back-btn:hover { 
+    opacity: 0.7; 
+    transform: translateX(-4px);
+  }
+  
+  /* CONTAINER - UNCHANGED PER REQUEST */
+  .post-container { max-width: 800px; margin: 0 auto; padding: 6rem 2rem 6rem; }
+  
+  /* ARTICLE ELEMENTS */
+  h1 { 
+    font-family: 'Playfair Display', serif; 
+    font-size: clamp(2.5rem, 5vw, 3.8rem); 
+    font-weight: 900;
+    line-height: 1.05; 
+    margin-bottom: 1.5rem; 
+    letter-spacing: -0.02em;
+    margin-top: 4rem; /* Spacing for the fixed nav */
+  }
+
+  .meta { 
+    color: var(--grey); 
+    font-size: 0.85rem; 
+    margin-bottom: 3.5rem; 
+    font-family: 'DM Mono', monospace; 
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .meta::before {
+    content: "";
+    width: 20px;
+    height: 1px;
+    background: var(--green);
+    display: inline-block;
+  }
+
+  .hero-img { 
+    width: 100%; 
+    height: 500px; 
+    object-fit: cover; 
+    border-radius: 2px; 
+    margin-bottom: 4rem; 
+    box-shadow: var(--shadow);
+  }
+  
+  .content { 
+    font-size: 1.2rem; 
+    color: #222; 
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  .content p { margin-bottom: 2.2rem; }
+
+  .content h2 { 
+    font-family: 'Playfair Display', serif; 
+    margin: 4rem 0 1.5rem; 
+    color: var(--black); 
+    font-size: 2.2rem; 
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  /* LOADING STATE */
+  #loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 40vh;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+
+  #loading::after {
+    content: "";
+    width: 40px;
+    height: 1px;
+    background: var(--green);
+    margin-top: 1rem;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scaleX(0.5); opacity: 0.2; }
+    50% { transform: scaleX(1.5); opacity: 1; }
+    100% { transform: scaleX(0.5); opacity: 0.2; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) {
+    .post-nav { padding: 1rem 1.5rem; }
+    h1 { font-size: 2.5rem; }
+    .hero-img { height: 350px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="post-nav">
+    <a href="blogs.html" class="back-btn">← Back to Archive</a>
+</nav>
+
+<div class="post-container">
+    <div id="loading">Gathering insights</div>
+    
+    <div id="article-view" style="display:none;">
+        <h1 id="post-title"></h1>
+        <div class="meta" id="post-meta"></div>
+        <img id="post-hero" class="hero-img" src="" alt="">
+        <div class="content" id="post-body"></div>
+    </div>
+</div>
+
+<script>
+    async function getArticle() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get('slug');
+        const PROJECT_ID = "uc51i7d5"; 
+
+        if (!slug) {
+            window.location.href = 'blogs.html';
+            return;
+        }
+
+        const QUERY = encodeURIComponent(`*[_type == "post" && slug.current == "${slug}"][0]{
+            title,
+            author,
+            "imageUrl": mainImage.asset->url,
+            publishedAt,
+            body
+        }`);
+
+        try {
+            const response = await fetch(`https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/production?query=${QUERY}`);
+            const { result } = await response.json();
+
+            if (result) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('article-view').style.display = 'block';
+                
+                document.title = `${result.title} | The Distribution Lab`;
+                document.getElementById('post-title').innerText = result.title;
+                document.getElementById('post-meta').innerText = `${result.author || 'Abhishek Rajput'} · ${new Date(result.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+                document.getElementById('post-hero').src = result.imageUrl;
+                document.getElementById('post-hero').alt = result.title;
+                
+                const bodyContainer = document.getElementById('post-body');
+                if (result.body) {
+                    bodyContainer.innerHTML = result.body.map(block => {
+                        if (block._type !== 'block' || !block.children) return '';
+                        const text = block.children.map(child => child.text).join('');
+                        if (block.style === 'h2') return `<h2>${text}</h2>`;
+                        return `<p>${text}</p>`;
+                    }).join('');
+                }
+            } else {
+                document.getElementById('loading').innerText = "Article not found.";
+            }
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            document.getElementById('loading').innerText = "Connection error. Please try again.";
+        }
+    }
+    getArticle();
+</script>
+</body>
+</html>
